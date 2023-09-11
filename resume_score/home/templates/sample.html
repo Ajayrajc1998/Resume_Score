@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stylish PDF Upload</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .upload-container {
+            text-align: center;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        .upload-button {
+            background-color: #3498db;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .upload-button:hover {
+            background-color: #2980b9;
+        }
+        #pdfFiles {
+            display: none;
+        }
+        .file-label {
+            display: inline-block;
+            background-color: #3498db;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-container">
+        <label class="file-label" for="pdfFiles">Select PDF Files</label>
+        <input type="file" id="pdfFiles" name="pdfFiles[]" accept=".pdf" multiple>
+        <br>
+        <button class="upload-button" onclick="uploadFiles()">Upload</button>
+    </div>
+
+    <script>
+        function uploadFiles() {
+            // Add your file upload logic here
+        }
+    </script>
+</body>
+</html>

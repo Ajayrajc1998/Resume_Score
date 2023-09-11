@@ -1,0 +1,55 @@
+{% extends 'index.html' %}
+{% load static %}
+{% block main %}
+<br>
+<div class='container-fluid' style="width: 75vw;">
+    <form id="search-form" method="get" style="margin-bottom: 1rem;">
+        <input type="text" id="search-input" style="border-radius: 50px;"  name="q" placeholder="Search...">
+        <button type="submit" style="border-radius: 50px; background-color: #82ca9c; outline: none; border: 0;" id="search-button"><i class="fa fa-search"></i> Search</button>
+    </form>
+    <table class='table'>
+        <thead>
+            <tr style="background-color: #e6f5e9;">
+                <th>Name</th>
+                <th>Email</th>
+                <th>Job</th>
+                <th>Score</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for file in files %}
+            <tr>
+                <td>{{ file.name }}</td>
+                <td>{{ file.email }}</td>
+                <td>{{ file.job }}</td>
+                <td>{{ file.score }}</td>
+                <td style="font-size: 1.4rem;">
+                    <a href="{% url 'delete_file' file.id %}" class="delete-button text-danger fa fa-trash" style="margin-right:1rem;"></a>
+                    <a href="{% url 'view_pdf' file.id %}" class='text-primary fa fa-print'></a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+
+</div>
+
+
+
+
+{% endblock main %}
+
+{% block scripts %}
+<script>
+    // Wrap your JavaScript code in a DOMContentLoaded event listener
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('search-button').addEventListener('click', function() {
+            const query = document.getElementById('search-input').value;
+            window.location.href = `/applicants_view/?q=${query}`;
+        });
+    });
+</script>
+{% endblock scripts %}

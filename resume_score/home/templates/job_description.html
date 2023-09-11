@@ -1,0 +1,598 @@
+{% extends 'index.html' %} {% block link %} {% load static %}
+<link rel="stylesheet" href="{% static 'css/job_description.css' %}" />
+{% block links %}
+<link rel="stylesheet" href="{% static 'css/fileupload.css' %}">
+<script src="https://kit.fontawesome.com/4544b2b530.js" crossorigin="anonymous"></script>
+{% endblock links %}
+{% endblock link %} {% block main %}
+<div class="container mt-5">
+  <h3>Add New Job</h3>
+
+  <form method="post" id="jobForm" action="{% url 'add_job' %}">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="job_title" class="form-label">Job Title</label>
+                <input
+                    type="text"
+                    class="form-control"
+                    id="job_title"
+                    name="job_title"
+                    required
+                />
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="score_threshold" class="form-label">Score Threshold</label>
+                <input
+                    type="text"
+                    class="form-control"
+                    id="score_threshold"
+                    name="score_threshold"
+                    required
+                />
+            </div>
+        </div>
+    </div>
+    <div class="mb-3" style="margin-top:10px;">
+        <label for="job_description" class="form-label">Job Description</label>
+        <textarea
+            class="form-control"
+            id="job_description"
+            name="job_description"
+            rows="4"
+            required
+        ></textarea>
+    </div>
+</form>
+  <button onclick="save_job()"  class="btn btn-primary" style="margin-top:10px">Save Job</button>
+  <script>
+    const save_job = () => {
+      console.log("button clicked");
+      const job_description = document.getElementById("job_description").value;
+      const job_name = document.getElementById("job_title").value;
+    
+      if (job_description && job_name) {
+        document.getElementById("jobForm").submit();
+        alert('Saved Job and Job Description');
+      } else {
+        alert('Please fill in both Job and Job Description fields');
+      }
+    };
+    
+  </script>
+  <div
+    class="d-flex flex-column align-items-center justify-content-center mt-5"
+  >
+    <h6 id="selectedJobDescription"></h6>
+  </div>
+</div>
+
+{% comment %} for uploading best resume and saving to check the score of applicants  {% endcomment %}
+<div class="wrappers">
+    <div class="container">
+      <h1>Upload Resume Here for Comparison</h1>
+      <div class="upload-container">
+        <div class="border-container">
+          <div class="icons fa-4x" style="display:flex; width:100%; justify-content:center; margin-bottom:5rem;">
+            <i class="fas fa-file-image" style='margin-right:10px' data-fa-transform="shrink-3 down-2 left-6 rotate--45"></i>
+            <i class="fas fa-file-alt" style='margin-right:10px' data-fa-transform="shrink-2 up-4"></i>
+            <i class="fas fa-file-pdf" data-fa-transform="shrink-3 down-2 right-6 rotate-45"></i>
+          </div>
+            <div id="file-drop-area">
+              <div class="main t" style="margin-left:430px">
+                <label for="job">Select the Job you want to add skills</label>
+                <select required class="select rounded-pill" name="job" id="jobSelect" style="background-color: #82ca9c; color: white;padding: 10px;">
+                  <option value="" disabled selected>Select a job</option>
+                  {% for job in jobs %}
+                      <option value="{{ job.title }}">{{ job.title }}</option>
+                  {% endfor %}
+              </select>   
+            </div>
+                {% comment %} <div >
+                    <!--<input type="file" id="file-upload">-->
+                    <p>Drag and drop files here, or <a href="#" id="file-browser" accept="application/pdf">browse</a> your computer.</p>
+                </div> {% endcomment %}
+                
+                <div id="file-drop-area" ondrop="handleDrop(event)" style="border: 2px dashed #ccc; padding: 20px; text-align: center;">
+        <p>Drag and drop files here, or <a href="#" id="file-browser">browse</a> your computer.</p>
+    </div>
+
+                <div id="preview"></div>
+                <button id="submit-button"  style="display: none; border-radius: 30px;margin-left:450px ;margin-top:8px;padding:10px 10px" class="btn btn-success btn-md">Submit</button>
+                {% comment %} <button id="submit-button" style="display: none;border-radius:50%%" class="btn btn-success">Submit</button> {% endcomment %}
+            </div>
+            <div style=" display: none;  margin-top: 8px; position: relative; left: 50%; transform: translate(-50%,0%);" id="loadingbtn" class="lds-spinner">
+              <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; max-width: 100%; margin: 0 auto;">
+            <ul id="skillsList"  style="list-style: none; padding: 0; width: 100%; display: flex; flex-wrap: wrap;"></ul>
+          </div>
+          <button id="submit-button_final" value = "Test the alert"   style="display: none; border-radius: 30px;margin-left:450px ;margin-top:8px;padding:10px 10px" class="btn btn-success btn-md">Submit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+      <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+{% endblock main %}
+{% block scripts %}
+<style>
+  #message-area{
+    background-color: #4CAF50; /* Green background color for success messages */
+    color: white; /* Text color for success messages */
+    padding: 10px; /* Padding for the message area */
+    margin-bottom: 10px; /* Spacing between messages and other content */
+    text-align: center; /* Center-align the text */
+    {% comment %} border-radius: 50px; /* {% endcomment %}
+  }
+  .lds-spinner {
+      color: #000;
+      display: inline-block;
+      position: relative;
+      width: 80px;
+      height: 80px;
+    }
+    .lds-spinner div {
+      transform-origin: 40px 40px;
+      animation: lds-spinner 1.2s linear infinite;
+    }
+    .lds-spinner div:after {
+      background: #82ca9c;
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 3px;
+      left: 37px;
+      width: 6px;
+      height: 18px;
+      border-radius: 20%;
+     
+    }
+    .lds-spinner div:nth-child(1) {
+      transform: rotate(0deg);
+      animation-delay: -1.1s;
+    }
+    .lds-spinner div:nth-child(2) {
+      transform: rotate(30deg);
+      animation-delay: -1s;
+    }
+    .lds-spinner div:nth-child(3) {
+      transform: rotate(60deg);
+      animation-delay: -0.9s;
+    }
+    .lds-spinner div:nth-child(4) {
+      transform: rotate(90deg);
+      animation-delay: -0.8s;
+    }
+    .lds-spinner div:nth-child(5) {
+      transform: rotate(120deg);
+      animation-delay: -0.7s;
+    }
+    .lds-spinner div:nth-child(6) {
+      transform: rotate(150deg);
+      animation-delay: -0.6s;
+    }
+    .lds-spinner div:nth-child(7) {
+      transform: rotate(180deg);
+      animation-delay: -0.5s;
+    }
+    .lds-spinner div:nth-child(8) {
+      transform: rotate(210deg);
+      animation-delay: -0.4s;
+    }
+    .lds-spinner div:nth-child(9) {
+      transform: rotate(240deg);
+      animation-delay: -0.3s;
+    }
+    .lds-spinner div:nth-child(10) {
+      transform: rotate(270deg);
+      animation-delay: -0.2s;
+    }
+    .lds-spinner div:nth-child(11) {
+      transform: rotate(300deg);
+      animation-delay: -0.1s;
+    }
+    .lds-spinner div:nth-child(12) {
+      transform: rotate(330deg);
+      animation-delay: 0s;
+    }
+    @keyframes lds-spinner {
+      0% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
+    #modalContainer {
+      background-color:rgba(0, 0, 0, 0.3);
+      position:absolute;
+      top:0;
+      width:100%;
+      height:100%;
+      left:0px;
+      z-index:10000;
+      background-image:url(tp.png); /* required by MSIE to prevent actions on lower z-index elements */
+    }
+    
+    #alertBox {
+      position:relative;
+      width:33%;
+      min-height:100px;
+      max-height:400px;
+      margin-top:50px;
+      border:1px solid #fff;
+      background-color:#fff;
+      background-repeat:no-repeat;
+      top:30%;
+    }
+    
+    #modalContainer > #alertBox {
+      position:fixed;
+    }
+    
+    #alertBox h1 {
+      margin:0;
+      font:bold 1em Raleway,arial;
+      background-color:#4CAF50;
+      color:#FFF;
+      border-bottom:1px solid #4CAF50;
+      padding:10px 0 10px 5px;
+    }
+    
+    #alertBox p {
+      height:50px;
+      padding-left:5px;
+      padding-top:30px;
+      text-align:center;
+      vertical-align:middle;
+    }
+    
+    #alertBox #closeBtn {
+      display:block;
+      position:relative;
+      margin:10px auto 10px auto;
+      padding:7px;
+      border:0 none;
+      width:70px;
+      text-transform:uppercase;
+      text-align:center;
+      color:#FFF;
+      background-color:#4CAF50;
+      border-radius: 0px;
+      text-decoration:none;
+      outline:0!important;
+    }
+    
+    /* unrelated styles */
+    
+    #mContainer {
+      position:relative;
+      width:600px;
+      margin:auto;
+      padding:5px;
+      border-top:2px solid #fff;
+      border-bottom:2px solid #fff;
+    }
+    
+    h1,h2 {
+      margin:0;
+      padding:4px;
+    }
+    
+    code {
+      font-size:1.2em;
+      color:#069;
+    }
+    
+    #credits {
+      position:relative;
+      margin:25px auto 0px auto;
+      width:350px; 
+      font:0.7em verdana;
+      border-top:1px solid #000;
+      border-bottom:1px solid #000;
+      height:90px;
+      padding-top:4px;
+    }
+    
+    #credits img {
+      float:left;
+      margin:5px 10px 5px 0px;
+      border:1px solid #000000;
+      width:80px;
+      height:79px;
+    }
+    
+    .important {
+      background-color:#F5FCC8;
+      padding:2px;
+    
+    }
+    
+    @media (max-width: 600px) 
+    {
+      #alertBox {
+      position:relative;
+      width:90%;
+      top:30%;
+    }
+  }
+    
+</style>
+<script src={% static 'js/fileupload.js' %}></script>
+<script>
+  const fileBrowser = document.getElementById('file-browser');
+  const fileDropArea = document.getElementById('file-drop-area');
+  const preview = document.getElementById('preview');
+  const submitButton = document.getElementById('submit-button');
+  let fileInput;
+  
+  function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+  }
+
+  fileBrowser.addEventListener('click', function (e) {
+      e.preventDefault();
+      fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.style.display = 'none';
+
+      fileInput.addEventListener('change', function () {
+          const selectedFile = fileInput.files[0];
+          const objectURL = URL.createObjectURL(selectedFile);
+
+          const pdfPreview = document.createElement('embed');
+          pdfPreview.src = objectURL;
+          pdfPreview.type = 'application/pdf';
+          pdfPreview.width = '100%';
+          pdfPreview.height = '500px';
+
+          preview.innerHTML = '';
+          preview.appendChild(pdfPreview);
+          submitButton.style.display = 'block';
+      });
+
+      fileDropArea.appendChild(fileInput);
+      fileInput.click();
+  });
+
+
+  let globalskills
+  let globalSelectedJobId
+// Rest of your code...
+submitButton.addEventListener('click', function () {
+  const selectedJobId = document.getElementById('jobSelect').value;
+  globalSelectedJobId=selectedJobId;
+  if (!selectedJobId) {
+      alert('Please select a job before submitting.');
+      return;
+  }
+
+  if (fileInput) {
+      const selectedFile = fileInput.files[0];
+      if (selectedFile) {
+          document.getElementById('loadingbtn').style.display = 'block';
+          document.getElementById('submit-button').style.display = 'none';
+          const formData = new FormData();
+          formData.append('pdf_file', selectedFile);
+          formData.append('job_id', selectedJobId);
+
+          const csrfToken = getCookie('csrftoken');
+
+          fetch('/adminupload/', {
+              method: 'POST',
+              headers: {
+                  'X-CSRFToken': csrfToken
+              },
+              body: formData
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.context.skills) {
+              let skills = data.context.skills
+              globalskills=skills
+              console.log('Extracted Skills:', data.context.skills);
+              //alert('Skills extracted and logged to console.');
+              document.getElementById('loadingbtn').style.display = 'none';
+              const skillsList = document.getElementById('skillsList');
+              document.getElementById('submit-button_final').style.display = 'block';
+              // Loop through the skills array and create <li> elements
+                skills.forEach(skill => {
+                  const listItem = document.createElement('li');
+                  listItem.textContent = skill;
+                  listItem.style.borderRadius = '50px'; // Apply border radius
+                  listItem.style.backgroundColor = 'rgb(130, 202, 156)';
+                  listItem.style.border = '1px solid #ccc';
+                  listItem.style.padding = '10px';
+                  listItem.style.margin = '5px';
+                  listItem.style.fontWeight = '400';
+                  listItem.style.color = 'white'; 
+                  const closeIcon = document.createElement('span');
+                  closeIcon.style.fontSize='25px';
+                  closeIcon.style.fontWeight = 'bold'; 
+                  closeIcon.style.cursor = 'pointer';
+                  closeIcon.style.paddingLeft = '5px'; 
+                  closeIcon.innerHTML = '&times;'; // Using 'times' symbol (×) as close icon
+                  closeIcon.classList.add('close-icon');
+                  listItem.appendChild(closeIcon);
+                  listItem.classList.add('skill-item');
+                  skillsList.appendChild(listItem);
+              });
+
+              skillsList.addEventListener('click', function (event) {
+                if (event.target.classList.contains('close-icon')) {
+               const listItem = event.target.parentNode; // Get the parent <li> element
+                 listItem.remove(); // Remove the clicked skill from the list
+                 console.log('li==',listItem)
+                  let item = listItem.textContent.slice(0,listItem.textContent.length-1)
+                 skills.splice(skills.indexOf(item),1);
+                 console.log('kk=',skills)
+                }
+              });
+              /*skillsList.addEventListener('click', function (event) {
+                if (event.target.classList.contains('close-icon')) {
+                  const listItem = event.target.parentNode; // Get the parent <li> element
+                  const skillText = listItem.textContent.trim(); // Get the skill text content
+                  const skillIndex = skills.indexOf(skillText); // Find the index of the skill
+                  if (skillIndex !== -1) {
+                    skills.splice(skillIndex, 1); // Remove the skill from the array
+                    listItem.remove(); // Remove the clicked skill from the list
+                  }
+                }
+              });*/
+              console.log('uyih8yyhy8hyg8y',skills);
+              console.log("helloooo") 
+              
+
+              // Rest of your code...
+  
+// Use the 'skills' data as needed
+
+              // Use the 'skills' data as needed
+          }
+          })
+          .catch(error => {
+              console.error(error);
+          });
+      }
+  }
+});
+
+
+
+
+
+
+
+const submitButtonFinal = document.getElementById('submit-button_final');
+submitButtonFinal.addEventListener('click', function () {
+  console.log("skills final submit button", globalskills);
+  console.log("job id*************** ", globalSelectedJobId);
+  const selectedJobId = document.getElementById('jobSelect').value;
+  if (!selectedJobId) {
+      alert('Please select a job before submitting.');
+      return;
+  }
+  const requestData = {
+    skills: globalskills,
+    job_id: globalSelectedJobId,
+  };
+
+  const csrfToken = getCookie('csrftoken');
+
+  fetch('{% url "upload_skill_HR" %}', {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': csrfToken,
+      'Content-Type': 'application/json',  // Set content type to JSON
+    },
+    body: JSON.stringify(requestData),  // Convert the data to JSON
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json(); // Try to parse the response as JSON
+    })
+    .then(data => {
+      // Handle the parsed JSON data here
+      console.log('Data:', data);
+      const messageArea=document.getElementById('message-area');
+      if (data.status && data.messages) {
+        console.log('Message:', data.messages);
+        alert(data.messages);
+        messageArea.innerText = data.messages;
+        console.log("ethilek keryo avoo!!!",messageArea.innerText);
+        messageArea.style.display = 'block';
+        // Perform further operations based on the message and status
+      } else {
+        console.error('Server Error:', data.messages);
+        // Handle the server error condition
+      }
+    })
+    .catch(error => {
+      // Handle fetch errors here
+      console.error('Fetch Error:', error);
+    });
+});
+</script>
+<script>
+  var ALERT_TITLE = "Messages";
+  var ALERT_BUTTON_TEXT = "Ok";
+  
+  if(document.getElementById) {
+    window.alert = function(txt) {
+      createCustomAlert(txt);
+    }
+  }
+  
+  function createCustomAlert(txt) {
+    d = document;
+  
+    if(d.getElementById("modalContainer")) return;
+  
+    mObj = d.getElementsByTagName("body")[0].appendChild(d.createElement("div"));
+    mObj.id = "modalContainer";
+    mObj.style.height = d.documentElement.scrollHeight + "px";
+    
+    alertObj = mObj.appendChild(d.createElement("div"));
+    alertObj.id = "alertBox";
+    if(d.all && !window.opera) alertObj.style.top = document.documentElement.scrollTop + "px";
+    alertObj.style.left = (d.documentElement.scrollWidth - alertObj.offsetWidth)/2 + "px";
+    alertObj.style.visiblity="visible";
+  
+    h1 = alertObj.appendChild(d.createElement("h1"));
+    h1.appendChild(d.createTextNode(ALERT_TITLE));
+  
+    msg = alertObj.appendChild(d.createElement("p"));
+    //msg.appendChild(d.createTextNode(txt));
+    msg.innerHTML = txt;
+  
+    btn = alertObj.appendChild(d.createElement("a"));
+    btn.id = "closeBtn";
+    btn.appendChild(d.createTextNode(ALERT_BUTTON_TEXT));
+    btn.href = "#";
+    btn.focus();
+    btn.onclick = function() { removeCustomAlert();return false; }
+  
+    alertObj.style.display = "block";
+    
+  }
+  
+  function removeCustomAlert() {
+    document.getElementsByTagName("body")[0].removeChild(document.getElementById("modalContainer"));
+  }
+  function ful(){
+  alert('Alert this pages');
+  }
+
+
+</script>
+
+  {% comment %} <script>
+    let jobSelect = document.getElementById("job");
+    let selectedValue
+    console.log(selectedValue,)
+    jobSelect.onchange = function() {
+        let selectedOption = jobSelect.options[jobSelect.selectedIndex];
+        selectedValue = selectedOption.value;
+        console.log("Selected job ID:", selectedValue);
+        
+        // You can use the selectedValue variable in your desired way (e.g., send it to a server, update other parts of the page, etc.).
+    };
+</script> {% endcomment %}
+
+
+
+{% endblock scripts %}

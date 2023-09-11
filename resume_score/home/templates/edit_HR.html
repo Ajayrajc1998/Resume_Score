@@ -1,0 +1,638 @@
+{% extends 'index.html' %} {% load static %} {% block main %} {% block link %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+{% endblock link %}
+<style>
+  #alertBox {
+    position:relative;
+    width:33%;
+    min-height:100px;
+    max-height:400px;
+    margin-top:50px;
+    border:1px solid #fff;
+    background-color:#fff;
+    background-repeat:no-repeat;
+    top:30%;
+  }
+  
+  #modalContainer > #alertBox {
+    position:fixed;
+  }
+  
+  #alertBox h1 {
+    margin:0;
+    font:bold 1em Raleway,arial;
+    background-color:#4CAF50;
+    color:#FFF;
+    border-bottom:1px solid #4CAF50;
+    padding:10px 0 10px 5px;
+  }
+  
+  #alertBox p {
+    height:50px;
+    padding-left:5px;
+    padding-top:30px;
+    text-align:center;
+    vertical-align:middle;
+  }
+  
+  #alertBox #closeBtn {
+    display:block;
+    position:relative;
+    margin:10px auto 10px auto;
+    padding:7px;
+    border:0 none;
+    width:70px;
+    text-transform:uppercase;
+    text-align:center;
+    color:#FFF;
+    background-color:#4CAF50;
+    border-radius: 0px;
+    text-decoration:none;
+    outline:0!important;
+  }
+  
+  /* unrelated styles */
+  
+  #mContainer {
+    position:relative;
+    width:600px;
+    margin:auto;
+    padding:5px;
+    border-top:2px solid #fff;
+    border-bottom:2px solid #fff;
+  }
+  
+  h1,h2 {
+    margin:0;
+    padding:4px;
+  }
+  
+  code {
+    font-size:1.2em;
+    color:#069;
+  }
+  
+  #credits {
+    position:relative;
+    margin:25px auto 0px auto;
+    width:350px; 
+    font:0.7em verdana;
+    border-top:1px solid #000;
+    border-bottom:1px solid #000;
+    height:90px;
+    padding-top:4px;
+  }
+  
+  #credits img {
+    float:left;
+    margin:5px 10px 5px 0px;
+    border:1px solid #000000;
+    width:80px;
+    height:79px;
+  }
+  
+  .important {
+    background-color:#F5FCC8;
+    padding:2px;
+  
+  }
+  
+  @media (max-width: 600px) 
+  {
+    #alertBox {
+    position:relative;
+    width:90%;
+    top:30%;
+  }
+}
+
+
+
+
+</style>
+<br>
+<h3>Add New Skills</h3>
+<!-- Add this table to your HTML template -->
+<form id="applicationForm" action="{% url 'save_skills' %}" method="post" style="display: flex">
+  {% csrf_token %}
+<div class="main" style="display: flex;margin-left:10px">
+  <div style="display: flex; align-items: center; margin-bottom: 20px; ">
+    <label for="job" style="margin-right: 10px">Select the Job you want to add Skills:</label>
+    <select
+      required
+      class="select rounded-pill"
+      name="job"
+      id="jobSelect"
+      style="background-color: #82ca9c; color: white;max-height:40px; padding: 10px;border-radius:50px;"
+    >
+      <option value="" disabled selected>Select a job</option>
+      {% for job in jobs %}
+      <option value="{{ job.title }}">{{ job.title }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  
+    <input
+      placeholder="enter the skill you want to add"
+      style="border-radius:50px;margin-left:16px;max-height:40px; border:0.5px solid #82ca9c; padding 20px; max-width:500px; "
+      type="text"
+      name="skill"
+      required=true
+    />
+
+  </form>
+  <button onclick="save_job()" class='btn' type="submit" style='border-radius:50px;margin-left:10px;max-height:40px;justify-content:center; background-color:#82ca9c;color: white;     '>Add Skill</button> <!-- Use type="submit" to submit the form -->
+  <script>
+    const save_job = () => {
+      console.log("button clicked");
+      const job = document.getElementById("job").value;
+      const skill = document.getElementById("skill").value;
+      console.log('jobbbb',job);
+      console.log('skilllll',skill);
+      if (job && skill) {
+        document.getElementById("applicationForm").submit();
+        alert('Saved!');
+      } else {
+        alert('Please fill in both Job and Skill fields');
+      }
+    };
+    
+  </script>
+</div>
+<div class="container-fluid" style="width: 95vw;">
+  <i class="fa fa-plus mb-3" id="add-job-button" style="border-radius:10px; margin-bottom:1rem; display: flex; justify-content:center; align-items: center; font-size:1.2rem; border: 1px solid gray; width:3.5rem; cursor: pointer; height:3rem;" title="Add New Jobs"></i>
+  <table class="table">
+    <thead>
+      <tr data-job-id="{{ job.id }}" style="background-color: #e6f5e9;">
+        <th>Job Title</th>
+        <th>Job Description</th>
+        <th>Score Threshold</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% if jobs %} {% for job in jobs %}
+      <tr data-job-id="{{ job.id }}">
+        <td>{{ job.title }}</td>
+        <td style="max-width:25vw;" class="job-description">{{ job.description }}</td>
+        <td>{{ job.score_threshold }}</td>
+        <td style="display: flex;">
+          <i class="text-primary edit-button fa fa-edit" style="font-size:2rem; margin-right: 1rem; cursor: pointer;"></i></button>
+          <i class="text-danger delete-button fa fa-trash" style="font-size:2rem; cursor: pointer;"></i>
+        </td>
+      </tr>
+      <tr class="edit-form" style="display: none" data-job-id="{{ job.id}}">
+        <td>
+          <input
+            type="text"
+            class="form-control"
+            name="job_title"
+            value="{{ job.title }}"
+          />
+        </td>
+        <td>
+          <textarea class="form-control" name="job_description">
+{{ job.description }}</textarea
+          >
+        </td>
+        <td>
+          <input
+            type="text"
+            class="form-control"
+            name="score_threshold"
+            value="{{ job.score_threshold }}"
+          />
+        </td>
+        <td>
+          <button class="btn btn-sm btn-success save-button">Save</button>
+        </td>
+      </tr>
+      {% endfor %} {% else %}
+      <tr>
+        <td colspan="4">No jobs available.</td>
+      </tr>
+      {% endif %}
+      <tr class="edit-form new-job-form" style="display: none">
+        <td>
+          <input
+            type="text"
+            class="form-control"
+            name="new_job_title"
+            placeholder="Job Title"
+          />
+        </td>
+        <td>
+          <textarea
+            class="form-control"
+            name="new_job_description"
+            placeholder="Job Description"
+          ></textarea>
+        </td>
+        <td>
+          <input
+            type="text"
+            class="form-control"
+            name="new_score_threshold"
+            placeholder="Score Threshold"
+          />
+        </td>
+        <td>
+          <button
+            class="btn btn-sm btn-success save-button new-job-save-button"
+          >
+            Save
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class='container-fluid'>
+  {% comment %} <table id="skillsTable" class="table table-striped table-bordered table-sm" cellspacing="0" width="100%">
+    <thead>
+      <tr>
+        <th class="th-sm">Title</th>
+        <th class="th-sm">Skills</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for skill in skills %}
+      <tr>
+        <td>{{ skill.title }}</td>
+        <td>{{ skill.skills }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table> {% endcomment %}
+
+
+
+{% endblock main %} {% block scripts %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css" />
+  
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
+
+{% comment %} <script src="https://cdn.datatables.net/1.11.6/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.6/css/jquery.dataTables.min.css"> {% endcomment %}
+<script>
+ 
+
+  $(document).ready(function () {
+    $('#dtBasicExample').DataTable();
+    $('.dataTables_length').addClass('bs-select');
+  });
+  </script>
+
+  
+<script>
+
+  const jobDescription = document.querySelectorAll(".job-description");
+  jobDescription.forEach(item => { item.innerText =  item.innerText.length < 500 ? item.innerText : item.innerText.slice(0,500) + "..."}); 
+  $(document).ready(function () {
+    //fuction for doing CRUD operations in job data
+
+    // Edit button click event
+    $(".edit-button").click(function () {
+      //console.log('pppp=',$("button.edit-skill-button").length)
+      let row = $(this).closest("tr");
+      row.next(".edit-form").show();
+      row.hide();
+      
+    });
+
+    $(".edit-button-skill").click(function () {
+      let row = $(this).closest("tr")
+      row.hide()
+    })
+
+    // Save button click event
+    // Save button click event
+    $(".save-button").click(function () {
+      let row = $(this).closest("tr");
+      let jobId = row.data("job-id");
+      console.log('jobiddddddd',jobId);
+      let jobTitle = row.find("input[name='job_title']").val();
+      let jobDescription = row.find("textarea[name='job_description']").val();
+      let scoreThreshold = row.find("input[name='score_threshold']").val();
+
+      // Send an AJAX request to update the data in the backend
+      $.ajax({
+        type: "POST",
+        url: "{% url 'edit_job' 0 %}".replace("0", jobId),
+        data: {
+          job_title: jobTitle,
+          job_description: jobDescription,
+          score_threshold: scoreThreshold,
+          csrfmiddlewaretoken: "{{ csrf_token }}",
+        },
+        success: function () {
+          
+          // Update the row with new data
+          row.prev().find("td:eq(0)").text(jobTitle);
+          row.prev().find("td:eq(1)").text(jobDescription.length < 500 ? jobDescription : jobDescription.slice(0,500) + "...");
+          row.prev().find("td:eq(2)").text(scoreThreshold);
+
+          // Toggle back to read-only mode
+          row.hide();
+          row.prev().show();
+          console.log("AJAX request succeeded.");
+        },
+        error: function () {
+          // Handle error if needed
+          console.log("AJAX request failed with status: " + status);
+          console.log("Error details: ");
+        },
+      });
+    });
+
+    // Delete button click event
+    // Delete button click event
+    $(".delete-button").click(function () {
+      let row = $(this).closest("tr");
+      let jobId = row.data("job-id"); // Extract jobId from the data-job-id attribute of the current row
+      console.log("job gettinggggg or nottt", jobId);
+      // Send an AJAX request to delete the record in the backend
+      $.ajax({
+        type: "POST",
+        url: `{% url 'delete_job' job_id=0 %}`.replace("0", jobId),
+        data: {
+          csrfmiddlewaretoken: "{{ csrf_token }}",
+        },
+        success: function () {
+          // Remove the current row
+          row.remove();
+          console.log("workinggggggggggggggggggggggggggggggggggg");
+
+          // Check if there are no more rows, and if so, hide the table
+          if ($(".table tbody tr").length === 0) {
+            $(".table").hide();
+          }
+        },
+        error: function () {
+          console.log("not workingggggggggggggggggggggg");
+          console.log(jobId);
+          // Handle error if needed
+        },
+      });
+    });
+
+    // Add New Job button click event
+    $("#add-job-button").click(function () {
+      // Hide all existing edit forms (if any)
+      $(".edit-form").hide();
+
+      // Show the new job form
+      $(".new-job-form").show();
+    });
+
+    // Save button click event for adding a new job
+    $(".new-job-save-button").click(function () {
+      let row = $(this).closest("tr");
+      let jobTitle = row.find("input[name='new_job_title']").val();
+      let jobDescription = row
+        .find("textarea[name='new_job_description']")
+        .val();
+      let scoreThreshold = row.find("input[name='new_score_threshold']").val();
+
+      // Send an AJAX request to add the new job to the backend
+      $.ajax({
+        type: "POST",
+        url: "{% url 'add_job' %}", // Update the URL to your Django view for adding a new job
+        data: {
+          job_title: jobTitle,
+          job_description: jobDescription,
+          score_threshold: scoreThreshold,
+          csrfmiddlewaretoken: "{{ csrf_token }}",
+        },
+        success: function (data) {
+          // Create a new row with the added job data
+          let newRow = `
+                <tr data-job-id="${data.job_id}">
+                    <td>${jobTitle}</td>
+                    <td>${jobDescription}</td>
+                    <td>${scoreThreshold}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary edit-button" data-resume-id="{{ resume.id }}">Edit</button>
+                        <button class="btn btn-sm btn-danger delete-button">Delete</button>
+                    </td>
+                </tr>
+                <tr class="edit-form" style="display: none;" data-job-id="${data.job_id}">
+                    <td>
+                        <input type="text" class="form-control" name="job_title" value="${jobTitle}" />
+                    </td>
+                    <td>
+                        <textarea class="form-control" name="job_description">${jobDescription}</textarea>
+                    </td> 
+                    <td>
+                        <input type="text" class="form-control" name="score_threshold" value="${scoreThreshold}" />
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-success save-button">Save</button>
+                    </td>
+                </tr>
+            `;
+
+          // Append the new row to the table
+          $("tbody").append(newRow);
+
+          // Reset form fields
+          row.find("input[name='new_job_title']").val("");
+          row.find("textarea[name='new_job_description']").val("");
+          row.find("input[name='new_score_threshold']").val("");
+
+          // Hide the new job form
+          row.hide();
+        },
+        error: function () {
+          // Handle error if needed
+        },
+      });
+    });
+
+//functions for doing CRUD operations on the skills 
+var table = $('#resumeTable').DataTable({
+  "paging": true, // Enable pagination
+  "lengthChange": false, // Hide the "Show X entries" dropdown
+  "searching": true, // Enable searching
+  "ordering": true, // Enable sorting
+  "info": true, // Show table information
+  "autoWidth": false, // Disable automatic column width adjustment
+  "columnDefs": [
+      { "width": "30%", "targets": 0 }, // Set a specific width for the first column (Title)
+      { "width": "50%", "targets": 1 }, // Set a specific width for the second column (Skills)
+      { "width": "20%", "targets": 2 }, // Set a specific width for the third column (Action buttons)
+  ],
+  "order": [[0, 'asc']], // Default sorting by the first column (Title) in ascending order
+  "language": {
+      "emptyTable": "No data available in table", // Message when the table is empty
+      "infoEmpty": "Showing 0 to 0 of 0 entries", // Message when no entries match the filter
+      "infoFiltered": "(filtered from _MAX_ total entries)", // Message indicating filtered results
+      "lengthMenu": "Show _MENU_ entries", // Label for the "Show X entries" dropdown
+      "search": "Search:", // Label for the search input
+      "zeroRecords": "No matching records found", // Message when no matching records are found
+      "paginate": {
+          "first": "First", // Label for the "First" page button
+          "last": "Last", // Label for the "Last" page button
+          "next": "Next", // Label for the "Next" page button
+          "previous": "Previous" // Label for the "Previous" page button
+      }
+  }
+});
+
+// Function to load resumes into the table
+function loadResumes() {
+  $.ajax({
+      url: '/api/get_resumes/',
+      method: 'GET',
+      success: function (data) {
+          table.clear().draw();
+          data.forEach(function (resume) {
+              var skillsList = resume.skills.join(', ');
+              var editBtn = '<button class="editBtn" data-id="' + resume.id + '">Edit</button>';
+              var deleteBtn = '<button class="deleteBtn" data-id="' + resume.id + '">Delete</button>';
+              table.row.add([
+                  resume.title,
+                  skillsList,
+                  editBtn + deleteBtn
+              ]).draw();
+          });
+      }
+  });
+}
+
+// Event handler for the "Add Skills" button
+$('#addSkillsBtn').click(function () {
+  var newRow = table.row.add([
+      '<input type="text" class="titleInput" placeholder="Resume Title">',
+      '<input type="text" class="skillsInput" placeholder="Skills">',
+      '<button class="saveBtn">Save</button>'
+  ]).draw();
+});
+
+// Event handler for the "Edit" button
+$('#resumeTable tbody').on('click', '.editBtn', function () {
+  var currentRow = $(this).closest('tr');
+  var titleCell = currentRow.find('td:eq(0)');
+  var skillsCell = currentRow.find('td:eq(1)');
+  var titleInput = '<input type="text" class="titleInput" value="' + titleCell.text() + '">';
+  var skillsInput = '<input type="text" class="skillsInput" value="' + skillsCell.text() + '">';
+  var saveBtn = '<button class="updateBtn" data-id="' + $(this).data('id') + '">Save</button>';
+  currentRow.html('<td>' + titleInput + '</td><td>' + skillsInput + '</td><td>' + saveBtn + '</td>');
+});
+
+// Event handler for the "Save" button (for both new and edited resumes)
+$('#resumeTable tbody').on('click', '.saveBtn', function () {
+  var currentRow = $(this).closest('tr');
+  var titleInput = currentRow.find('.titleInput').val();
+  var skillsInput = currentRow.find('.skillsInput').val().split(',');
+  var data = {
+      'title': titleInput,
+      'skills': skillsInput
+  };
+
+  $.ajax({
+      url: '/api/add_resume/',
+      method: 'POST',
+      data: JSON.stringify(data),
+      contentType: 'application/json',
+      success: function (response) {
+          loadResumes(); // Reload the table after saving
+      }
+  });
+});
+
+// Event handler for the "Update" button
+$('#resumeTable tbody').on('click', '.updateBtn', function () {
+  var currentRow = $(this).closest('tr');
+  var resumeId = $(this).data('id');
+  var titleInput = currentRow.find('.titleInput').val();
+  var skillsInput = currentRow.find('.skillsInput').val().split(',');
+  var data = {
+      'title': titleInput,
+      'skills': skillsInput
+  };
+
+  $.ajax({
+      url: '/api/update_resume/' + resumeId + '/',
+      method: 'PUT',
+      data: JSON.stringify(data),
+      contentType: 'application/json',
+      success: function (response) {
+          loadResumes(); // Reload the table after updating
+      }
+  });
+});
+
+// Event handler for the "Delete" button
+$('#resumeTable tbody').on('click', '.deleteBtn', function () {
+  var resumeId = $(this).data('id');
+  $.ajax({
+      url: '/api/delete_resume/' + resumeId + '/',
+      method: 'DELETE',
+      success: function (response) {
+          loadResumes(); // Reload the table after deleting
+      }
+  });
+});
+
+// Load resumes when the page loads
+loadResumes();
+});
+
+
+</script>
+<script>
+  var ALERT_TITLE = "Messages";
+  var ALERT_BUTTON_TEXT = "Ok";
+  
+  if(document.getElementById) {
+    window.alert = function(txt) {
+      createCustomAlert(txt);
+    }
+  }
+  
+  function createCustomAlert(txt) {
+    d = document;
+  
+    if(d.getElementById("modalContainer")) return;
+  
+    mObj = d.getElementsByTagName("body")[0].appendChild(d.createElement("div"));
+    mObj.id = "modalContainer";
+    mObj.style.height = d.documentElement.scrollHeight + "px";
+    
+    alertObj = mObj.appendChild(d.createElement("div"));
+    alertObj.id = "alertBox";
+    if(d.all && !window.opera) alertObj.style.top = document.documentElement.scrollTop + "px";
+    alertObj.style.left = (d.documentElement.scrollWidth - alertObj.offsetWidth)/2 + "px";
+    alertObj.style.visiblity="visible";
+  
+    h1 = alertObj.appendChild(d.createElement("h1"));
+    h1.appendChild(d.createTextNode(ALERT_TITLE));
+  
+    msg = alertObj.appendChild(d.createElement("p"));
+    //msg.appendChild(d.createTextNode(txt));
+    msg.innerHTML = txt;
+  
+    btn = alertObj.appendChild(d.createElement("a"));
+    btn.id = "closeBtn";
+    btn.appendChild(d.createTextNode(ALERT_BUTTON_TEXT));
+    btn.href = "#";
+    btn.focus();
+    btn.onclick = function() { removeCustomAlert();return false; }
+  
+    alertObj.style.display = "block";
+    
+  }
+  
+  function removeCustomAlert() {
+    document.getElementsByTagName("body")[0].removeChild(document.getElementById("modalContainer"));
+  }
+  function ful(){
+  alert('Alert this pages');
+  }
+
+
+</script>
+{% endblock scripts %}

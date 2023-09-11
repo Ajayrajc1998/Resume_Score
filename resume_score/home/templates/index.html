@@ -1,0 +1,222 @@
+{% load static %}
+    
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang=""> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang=""> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9" lang=""> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="">
+  <!--<![endif]-->
+  <head>
+    
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>Resume Scorer</title>
+    <link rel="shortcut icon" type="image/png" href='https://cdn-icons-png.flaticon.com/512/6614/6614677.png'/>
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    {% comment %} <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous"> {% endcomment %}
+    
+    <!--Google fonts links-->
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i"
+      rel="stylesheet"
+    />
+
+    {% block link %}{% endblock link %}
+  
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/plugins.css' %}">
+    <link rel="stylesheet" href="{% static 'css/roboto-webfont.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    
+    <script src="/resume_score/assets/js/vendor/modernizr-2.8.3-respond-1.4.2.min.js"></script>
+  </head>
+  <body>
+    <!--[if lt IE 8]>
+      <p class="browserupgrade">
+        You are using an <strong>outdated</strong> browser. Please
+        <a href="http://browsehappy.com/">upgrade your browser</a> to improve
+        your experience.
+      </p>
+    <![endif]-->
+
+    <!-- Sections -->
+    
+
+    <nav class=" navbar-default" style='background-color:#daf2e0;'>
+      <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button
+            type="button"
+            class="navbar-toggle collapsed"
+            data-toggle="collapse"
+            data-target="#bs-example-navbar-collapse-1"
+            aria-expanded="false"
+          >
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="{% url 'home' %}">Home</a></li>
+            
+            
+            
+            {% if user.is_authenticated %}
+            <li><a href="{% url 'resume_scores' %}">HR Score Checker</a></li>
+            <li><a href="{% url 'applicants_view' %}">Applicant View</a></li>
+            <li><a href="{% url 'edit_HR' %}">edit_HR</a></li>
+        <li><a href="{% url 'job_description' %}">Job_description</a></li>
+    {% endif %}
+            {% if is_score_check_show   %}
+    <!-- Do not display the <li> tag for the "Check Score" link -->
+{% else %}
+    <li><a href="test">Check Score</a></li>
+{% endif %} 
+            {% if user.is_authenticated %}
+            <li class="login"><a href="{% url 'logout' %}">Logout</a></li>
+            {% else %}
+            <li class="login"><a href="{% url 'login' %}">Sign In</a></li>
+            {% endif %}
+
+          </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+      </div>
+      <!-- /.container-fluid -->
+      {% comment %} <div style="background: linear-gradient(to bottom, transparent, black); height: 1px; position: relative; top: 22px;"></div> {% endcomment %}
+      
+    </nav>
+    <div style=''>
+   {% block main %}
+   
+
+   {% endblock main %}
+  </div>
+
+   
+    <section id="footer-menu" class="sections footer-menu">
+      <div class="container">
+        <div class="row">
+          <div class="footer-menu-wrapper">
+            <div class="col-md-8 col-sm-12 col-xs-12">
+              <div class="col-md-4 col-sm-6 col-xs-12">
+                <div class="menu-item">
+                  <h5>Quick Links</h5>
+                  <ul>
+                    <li>POWER BI DESKTOP</li>
+                    <li>MOBILE</li>
+                    <li>SEE ALL DOWNLOADS</li>
+                    <li>POWER BI DESKTOP</li>
+                    <li>MOBILE</li>
+                    <li>SEE ALL DOWNLOADS</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="col-md-4 col-sm-6 col-xs-12">
+                <div class="menu-item">
+                  <h5>Legal</h5>
+                  <ul>
+                    <li>PRIVACY & COOKIES</li>
+                    <li>TERMS OF USE</li>
+                    <li>TRADEMARKS</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="col-md-4 col-sm-6 col-xs-12">
+                <div class="menu-item">
+                  <h5>Information</h5>
+                  <ul>
+                    <li>SUPPORT</li>
+                    <li>DEVELOPERS</li>
+                    <li>BLOG</li>
+                    <li>NEWSLETTER</li>
+                    <li>PYRAMID ANALYTICS</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-4 col-sm-6 col-xs-12">
+              <div class="menu-item">
+                <h5>Newsletter</h5>
+                <p>
+                  Insights await in your company's data. Bring them into focus
+                  with BlueLance.
+                </p>
+                <div class="input-group">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Enter your email address"
+                  />
+                  <input
+                    type="submit"
+                    class="form-control"
+                    value="Use It Free"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!--Footer-->
+    <footer id="footer" class="footer">
+      <div class="container">
+        <div class="row">
+          <div class="footer-wrapper">
+            <div class="col-md-6 col-sm-6 col-xs-12">
+              <div class="footer-brand">
+                
+              </div>
+            </div>
+
+            <div class="col-md-6 col-sm-6 col-xs-12">
+              <div class="copyright">
+                
+              </div>
+
+              <div class="copyright">
+                
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <div class="scrollup">
+      <a href="#"><i class="fa fa-chevron-up"></i></a>
+    </div>
+
+    <script src="/resume_score/assets/js/vendor/jquery-1.11.2.min.js"></script>
+    <script src="/resume_score/assets/js/vendor/bootstrap.min.js"></script>
+
+    <script src="/resume_score/assets/js/plugins.js"></script>
+    <script src="/resume_score/assets/js/modernizr.js"></script>
+    <script src="/resume_score/assets/js/main.js"></script>
+
+    
+
+
+  </body>
+  {% block scripts %}
+
+  {% comment %} <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script> {% endcomment %}
+  {% endblock scripts %}
+</html>
