@@ -23,4 +23,7 @@ urlpatterns = [
     path("applicants_view", views.applicants_view, name="applicants_view"),
     path("get_job_description/", views.get_job_description, name="get_job_description"),
     path("delete-file/<int:file_id>/", views.delete_file, name="delete_file"),
+    path('update_skill/<int:skill_id>/', views.update_skill, name='update_skill'),
+    path('delete_skill/<int:skill_id>/', views.delete_skill, name='delete_skill'),
+    path("dashboard", views.dashboard, name="dashboard"),
 ]

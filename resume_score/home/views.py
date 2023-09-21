@@ -28,7 +28,8 @@ from polyfuzz import PolyFuzz
 from polyfuzz.models import Embeddings
 from flair.embeddings import TransformerWordEmbeddings
 from django.contrib.auth import login, logout
-
+from .forms import SkillEditForm
+from urllib.parse import quote
 
 # home page
 def home(request):
@@ -232,12 +233,8 @@ def save_skills(request):
     if request.method == "POST":
         job_title = request.POST.get("job")
         skill_name = request.POST.get("skill")
-        print("job_title--------------------------------------------------", job_title)
 
         if job_title and skill_name:
-            print(
-                "ia inside iffffffffffffff--------------------------------------------------"
-            )
             # Create a new Resume instance with the job title and skill
             resume = Resume(title=job_title, skills=skill_name)
             resume.save()
@@ -298,9 +295,37 @@ def add_job(request):
 def edit_HR(request):
     jobs = Job.objects.all()
     skills = Resume.objects.all()
-    return render(request, "edit_HR.html", {"jobs": jobs, "skills": skills})
+    return render(request, "edit_HR.html", {"jobs": jobs, "job_skills": skills})
+
+def update_skill(request, skill_id):
+    if request.method == 'POST':
+        try:
+            skill = Resume.objects.get(id=skill_id)
+            data = json.loads(request.body)
+            skill.title = data.get('title', skill.title)
+            skill.skills = data.get('skills', skill.skills)
+            skill.save()
+            return JsonResponse({'message': 'Skill updated successfully'})
+        except Resume.DoesNotExist:
+            return JsonResponse({'message': 'Skill not found'}, status=404)
+
+    return JsonResponse({'message': 'Invalid request method'}, status=400)
+
+def delete_skill(request, skill_id):
+    if request.method == 'POST':
+        try:
+            skill = Resume.objects.get(id=skill_id)
+            skill.delete()
+            return JsonResponse({'message': 'Skill deleted successfully'})
+        except Resume.DoesNotExist:
+            return JsonResponse({'message': 'Skill not found'}, status=404)
+
+    return JsonResponse({'message': 'Invalid request method'}, status=400)
 
 
+
+
+#########################################################################
 # editing function
 def edit_job(request, job_id):
     job = get_object_or_404(Job, id=job_id)
@@ -351,9 +376,14 @@ def delete_file(request, file_id):
 
 def view_pdf(request, file_id):
     file_to_print = get_object_or_404(UploadedFile, id=file_id)
-    response = FileResponse(
-        open(file_to_print.pdf_file.path, "rb"), content_type="application/pdf"
-    )
+    file_path = file_to_print.pdf_file.path
+    file_name = file_to_print.pdf_file.name.split("/")[-1]
+
+    with open(file_path, "rb") as pdf_file:
+        response = HttpResponse(pdf_file.read(), content_type="application/pdf")
+
+    # Use quote function to ensure proper encoding of the filename
+    response["Content-Disposition"] = f'inline; filename="{quote(file_name)}"'
     return response
 
 
@@ -375,6 +405,10 @@ def upload_file_admin(request):
 
 from django.contrib import messages
 from django.http import JsonResponse
+
+#power BI Dashboard 
+def dashboard(request):
+    return render(request, "dashboard.html")
 
 
 def upload_skill_HR(request):

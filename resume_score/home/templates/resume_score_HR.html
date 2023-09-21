@@ -34,14 +34,13 @@
   <form id="applicationForm" style="display: flex">
     {% csrf_token %}
     <input
-      placeholder="enter score you want to check"
-      style="margin-left:16px;max-height:40px; border:0.5px solid #82ca9c; padding 20px; max-width:500px; "
-      type="text"
-      id="score_req"
-      required=true
-      class="rounded-pill"
-      style="border: 0.5px solid #82ca9c; padding: 20px; max-width: 500px"
-    />
+  placeholder="enter score you want to check"
+  style="margin-left: 16px; max-height: 40px; border: 0.5px solid #82ca9c; padding: 20px; max-width: 500px;"
+  type="text"
+  id="score_req"
+  required
+  class="rounded-pill"
+/>
   </form>
 </div>
 <div id="FileUpload">
@@ -50,19 +49,22 @@
       <p>
         Drag files here or
         <label for="pdf-input" class="upload__button">Browse</label>
+        <input
+          type="file"
+          id="pdf-input"
+          accept=".pdf"
+          multiple
+          style="display: none"
+        />
       </p>
-      <input
-        type="file"
-        id="pdf-input"
-        accept=".pdf"
-        multiple
-        style="display: none"
-      />
     </div>
     <div id="uploaded-files" class="mt-3">
       <!-- This is where the uploaded files will be displayed -->
     </div>
   </div>
+</div>
+
+
   
 </div>
 <button id="submitButton" class="btn btn-primary mt-3" style="display: none; position: relative; left: 50%; transform: translate(-50%,0%); border-radius:15px; margin-bottom: 2rem;">
@@ -210,89 +212,95 @@
   });
 
   // Browse button functionality
-  const browseButton = document.querySelector(".upload__button");
-  const pdfInput = document.getElementById("pdf-input");
+  // JavaScript for file input handling
+const pdfInput = document.getElementById("pdf-input");
 
-  browseButton.addEventListener("click", () => {
-    pdfInput.click();
+pdfInput.addEventListener("change", handleFileUpload);
+
+function handleFileUpload(event) {
+  const files = event.target.files;
+  for (const file of files) {
+    displayUploadedFile(file);
+  }
+}
+
+function displayUploadedFile(file) {
+  const uploadedDiv = document.createElement("div");
+  uploadedDiv.className = "uploaded";
+
+  const icon = document.createElement("i");
+  icon.className = "far fa-file-pdf";
+
+  const fileDiv = document.createElement("div");
+  fileDiv.className = "file";
+
+  const fileNameDiv = document.createElement("div");
+  fileNameDiv.className = "file__name";
+
+  const fileName = document.createElement("p");
+  fileName.textContent = file.name;
+
+  fileNameDiv.appendChild(fileName);
+
+  const removeIcon = document.createElement("i");
+  removeIcon.className = "fa fa-window-close";
+  removeIcon.addEventListener("click", () => {
+    uploadedDiv.remove();
   });
 
-  pdfInput.addEventListener("change", handleFileUpload);
+  fileNameDiv.appendChild(removeIcon);
 
-  function handleFileUpload( event ) {
-    const files = event.target.files;
-    for (const file of files) {
-      displayUploadedFile(file);
-    }
-  }
+  const progressBar = document.createElement("div");
+  progressBar.className = "progress";
 
-  function displayUploadedFile(file) {
-    const uploadedDiv = document.createElement("div");
-    uploadedDiv.className = "uploaded";
+  const progressBarInner = document.createElement("div");
+  progressBarInner.className =
+    "progress-bar bg-success progress-bar-striped progress-bar-animated";
+  progressBarInner.style.width = "0%";
 
-    const icon = document.createElement("i");
-    icon.className = "far fa-file-pdf";
+  progressBar.appendChild(progressBarInner);
 
-    const fileDiv = document.createElement("div");
-    fileDiv.className = "file";
+  fileDiv.appendChild(fileNameDiv);
+  fileDiv.appendChild(progressBar);
 
-    const fileNameDiv = document.createElement("div");
-    fileNameDiv.className = "file__name";
+  uploadedDiv.appendChild(icon);
+  uploadedDiv.appendChild(fileDiv);
 
-    const fileName = document.createElement("p");
-    fileName.textContent = file.name;
+  const uploadedFilesDiv = document.getElementById("uploaded-files");
+  uploadedFilesDiv.appendChild(uploadedDiv);
 
-    fileNameDiv.appendChild(fileName);
-
-    const removeIcon = document.createElement("i");
-    removeIcon.className = "fa fa-window-close";
-    removeIcon.addEventListener("click", () => {
-      uploadedDiv.remove();
-    });
-
-    fileNameDiv.appendChild(removeIcon);
-
-    const progressBar = document.createElement("div");
-    progressBar.className = "progress";
-
-    const progressBarInner = document.createElement("div");
-    progressBarInner.className =
-      "progress-bar bg-success progress-bar-striped progress-bar-animated";
-    progressBarInner.style.width = "0%";
-
-    progressBar.appendChild(progressBarInner);
-
-    fileDiv.appendChild(fileNameDiv);
-    fileDiv.appendChild(progressBar);
-
-    uploadedDiv.appendChild(icon);
-    uploadedDiv.appendChild(fileDiv);
-
-    const uploadedFilesDiv = document.getElementById("uploaded-files");
-    uploadedFilesDiv.appendChild(uploadedDiv);
-
-    // Display the Submit button
-    document.getElementById("submitButton").style.display = "block";
-  }
+  // Display the Submit button
+  document.getElementById("submitButton").style.display = "block";
+}
 
   // Submit button click event
   document.getElementById("submitButton").addEventListener("click", () => {
+    const score_req = document.getElementById("score_req").value;
+  
+    // Check if score_req is empty
+    if (!score_req || !selectedJobId) {
+      alert("Please Fill All the information!!!");
+      return;  // Stop further processing
+    }
+  
+    // If score_req is not empty, proceed with form submission
     document.getElementById('loadingbtn').style.display = 'block';
     document.getElementById('submitButton').style.display = 'none';
     const pdfFiles = document.querySelectorAll(".file__name p");
     const pdfNames = Array.from(pdfFiles).map(
       (nameElement) => nameElement.textContent
     );
-    const score_req = document.getElementById("score_req").value;
-    // Perform your submit logic here
+    console.log(pdfNames,"pdf filesssssssssssss");
+    const selectedFiles = Array.from(pdfInput.files).filter((file) => pdfNames.includes(file.name));
+    // Rest of your form submission logic
     const formData = new FormData();
-    for (const file of pdfInput.files) {
+    for (const file of selectedFiles) {
       formData.append("pdf_files", file);
     }
     formData.append("job_id", selectedJobId);
     formData.append("score_req", score_req);
     const csrftoken = getCookie("csrftoken");
-
+  
     fetch('{% url "upload_pdf_HR" %}', {
       method: "POST",
       body: formData,
@@ -313,20 +321,20 @@
         document.getElementById('submitButton').style.display = 'block';
         const tableBody = document.getElementById("score-table-body");
         tableBody.innerHTML = ""; // Clear existing rows
-
+  
         for (const pdfName in data.results) {
           const row = tableBody.insertRow();
           const nameCell = row.insertCell(0);
           const scoreCell = row.insertCell(1);
           const statusCell = row.insertCell(2);
-          
+  
           const result = data.results[pdfName];  // Get the result object for the current PDF
-          
+  
           nameCell.textContent = pdfName;
           scoreCell.textContent = result.score;  // Access the score property
           statusCell.textContent = result.status;  // Access the status property
         }
-        
+  
         // Show the table
         scoreTableContainer.style.display = "block";
       })
@@ -334,7 +342,8 @@
         console.error("Error:", error);
       });
   });
-
+  
+  
   // Function to get CSRF token from cookies
   function getCookie(name) {
     let cookieValue = null;

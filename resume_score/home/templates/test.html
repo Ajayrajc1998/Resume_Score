@@ -359,9 +359,13 @@
     const name = document.getElementById('name').value ;
     const email = document.getElementById('email').value;
     console.log("ffffffffffffffffffffffffffff")
-    if (!selectedJobId) {
+    if (!selectedJobId ) {
         alert('Please select a job before submitting.');
         return;
+    }
+    if (!name || !email) {
+      alert("Please Enter Your Name and Email!")
+      return;
     }
 
     if (fileInput) {

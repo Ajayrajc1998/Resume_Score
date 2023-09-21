@@ -1,55 +1,97 @@
-{% extends 'index.html' %}
-{% load static %}
-{% block main %}
-<br>
-<div class='container-fluid' style="width: 75vw;">
-    <form id="search-form" method="get" style="margin-bottom: 1rem;">
-        <input type="text" id="search-input" style="border-radius: 50px;"  name="q" placeholder="Search...">
-        <button type="submit" style="border-radius: 50px; background-color: #82ca9c; outline: none; border: 0;" id="search-button"><i class="fa fa-search"></i> Search</button>
-    </form>
-    <table class='table'>
-        <thead>
-            <tr style="background-color: #e6f5e9;">
-                <th>Name</th>
-                <th>Email</th>
-                <th>Job</th>
-                <th>Score</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for file in files %}
-            <tr>
-                <td>{{ file.name }}</td>
-                <td>{{ file.email }}</td>
-                <td>{{ file.job }}</td>
-                <td>{{ file.score }}</td>
-                <td style="font-size: 1.4rem;">
-                    <a href="{% url 'delete_file' file.id %}" class="delete-button text-danger fa fa-trash" style="margin-right:1rem;"></a>
-                    <a href="{% url 'view_pdf' file.id %}" class='text-primary fa fa-print'></a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-
-
+{% extends 'index.html' %} {% load static %} {% block main %}
+<br />
+<div class="container-fluid" style="width: 75vw">
+  <form id="search-form" method="get" style="margin-bottom: 1rem">
+    <input
+      type="text"
+      id="search-input"
+      style="border-radius:50px;margin-left:16px;max-height:40px; border:0.5px solid #82ca9c; padding 20px; max-width:500px; "
+      name="q"
+      placeholder="Search..."
+    />
+  </form>
+  <table class="table" id="skills-table">
+    <thead>
+      <tr style="background-color: #e6f5e9">
+        <th>Name</th>
+        <th>Email</th>
+        <th>Job</th>
+        <th>Score</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for file in files %}
+      <tr>
+        <td>{{ file.name }}</td>
+        <td>{{ file.email }}</td>
+        <td>{{ file.job }}</td>
+        <td>{{ file.score }}</td>
+        <td style="font-size: 1.4rem">
+          <a
+            href="{% url 'delete_file' file.id %}"
+            class="delete-button text-danger fa fa-trash"
+            style="margin-right: 1rem"
+          ></a>
+          <a
+            href="{% url 'view_pdf' file.id %}"
+            class="text-primary fa fa-print"
+            target="_blank"
+          ></a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
-
-
-
-
-{% endblock main %}
-
-{% block scripts %}
+{% endblock main %} {% block scripts %}
 <script>
-    // Wrap your JavaScript code in a DOMContentLoaded event listener
-    document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('search-button').addEventListener('click', function() {
-            const query = document.getElementById('search-input').value;
-            window.location.href = `/applicants_view/?q=${query}`;
-        });
+  // Wrap your JavaScript code in a DOMContentLoaded event listener
+  document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("search-input");
+    const skillsTable = document.getElementById("skills-table");
+    const tableRows = skillsTable.getElementsByTagName("tr");
+
+    searchInput.addEventListener("input", function () {
+      const query = searchInput.value.trim().toLowerCase();
+
+      for (let i = 1; i < tableRows.length; i++) {
+        const name = tableRows[i]
+          .querySelector("td:nth-child(1)")
+          .textContent.trim()
+          .toLowerCase();
+        const email = tableRows[i]
+          .querySelector("td:nth-child(2)")
+          .textContent.trim()
+          .toLowerCase();
+        const job = tableRows[i]
+          .querySelector("td:nth-child(3)")
+          .textContent.trim()
+          .toLowerCase();
+        const score = tableRows[i]
+          .querySelector("td:nth-child(4)")
+          .textContent.trim()
+          .toLowerCase();
+
+        if (
+          name.includes(query) ||
+          email.includes(query) ||
+          job.includes(query) ||
+          score.includes(query)
+        ) {
+          tableRows[i].style.display = "";
+        } else {
+          tableRows[i].style.display = "none";
+        }
+      }
+
+      // If the search input is cleared, show all rows
+      if (query === "") {
+        for (let i = 1; i < tableRows.length; i++) {
+          tableRows[i].style.display = "";
+        }
+      }
     });
+  });
 </script>
 {% endblock scripts %}

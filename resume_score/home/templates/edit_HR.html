@@ -111,7 +111,7 @@
 
 </style>
 <br>
-<h3>Add New Skills</h3>
+<h3 style='margin-left:10px'>Add New Skills</h3>
 <!-- Add this table to your HTML template -->
 <form id="applicationForm" action="{% url 'save_skills' %}" method="post" style="display: flex">
   {% csrf_token %}
@@ -150,15 +150,26 @@
       console.log('jobbbb',job);
       console.log('skilllll',skill);
       if (job && skill) {
-        document.getElementById("applicationForm").submit();
         alert('Saved!');
+        document.getElementById("applicationForm").submit();
       } else {
         alert('Please fill in both Job and Skill fields');
       }
+      .then(response => response.json())
+      .then(data => {
+        alert(data.message);
+        // Handle any response from the server (e.g., display a success message)
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
     };
     
   </script>
 </div>
+<br>
+<h2>Job Details Edit</h2>
+<br>
 <div class="container-fluid" style="width: 95vw;">
   <i class="fa fa-plus mb-3" id="add-job-button" style="border-radius:10px; margin-bottom:1rem; display: flex; justify-content:center; align-items: center; font-size:1.2rem; border: 1px solid gray; width:3.5rem; cursor: pointer; height:3rem;" title="Add New Jobs"></i>
   <table class="table">
@@ -204,7 +215,8 @@
           />
         </td>
         <td>
-          <button class="btn btn-sm btn-success save-button">Save</button>
+          <i class="fa-solid fa-2xl fa-floppy-disk text-success save-button" style='margin-top:10px; cursor:pointer;'></i>
+          {% comment %} <button class="btn btn-sm btn-success save-button">Save</button> {% endcomment %}
         </td>
       </tr>
       {% endfor %} {% else %}
@@ -247,27 +259,206 @@
     </tbody>
   </table>
 </div>
-<div class='container-fluid'>
-  {% comment %} <table id="skillsTable" class="table table-striped table-bordered table-sm" cellspacing="0" width="100%">
+
+<h2 style='margin-left:10px'>Edit Skills</h2>
+<br>
+<br>
+<div class="container-fluid" style="width: 95vw;">
+  <input
+  type="text"
+  id="search-input"
+  placeholder="Search by title"
+  style="border-radius: 50px; margin-left: 16px; margin-bottom: 15px; max-height: 40px; border: 0.5px solid #82ca9c; padding: 20px; max-width: 500px;"
+>
+  
+  <table id="skills-table" class="table">
     <thead>
-      <tr>
-        <th class="th-sm">Title</th>
-        <th class="th-sm">Skills</th>
+      <tr style="background-color: #e6f5e9;">
+        <th>Title</th>
+        <th>Skills</th>
+        <th>Action</th>
       </tr>
     </thead>
     <tbody>
-      {% for skill in skills %}
-      <tr>
-        <td>{{ skill.title }}</td>
-        <td>{{ skill.skills }}</td>
-      </tr>
+      {% for skill in job_skills %}
+        <tr id="skill-row-{{ skill.id }}">
+          <td style="min-width:5vw;" id="skill-title-{{ skill.id }}">{{ skill.title }}</td>
+          <td style="min-width:5vw;" id="skill-skills-{{ skill.id }}">{{ skill.skills }}</td>
+          <td>
+            <i class=" text-primary fa-regular fa-pen-to-square edit-icon" style="font-size:2rem; margin-right: 1rem; cursor: pointer;" onclick="editSkill({{ skill.id }})"></i>
+            <i class="text-danger fa-solid fa-trash delete-icon" style="font-size:2rem; cursor: pointer;" onclick="deleteSkill({{ skill.id }})"></i>
+            <i class="text-success fa-solid fa-2xl fa-share-from-square save-icon"     onclick="saveSkill({{ skill.id }})" style="display: none;"></i>
+
+          </td>
+        </tr>
       {% endfor %}
     </tbody>
-  </table> {% endcomment %}
+  </table>
+  <div id="pagination">
+    <i id="prev-page" class="fa-solid fa-square-caret-left fa-2xl" style="color: #cae8b5; cursor: pointer;" onclick="prevPage()"></i>
+    <br>
+    <i id="next-page" class="fa-solid fa-square-caret-right fa-2xl" style="margin-top:15px;color: #cae8b5; cursor: pointer;" onclick="nextPage()"></i>
+    <br>
+    <span id="page-num">Page 1</span>
+  </div>
+</div>
+
+<script>
+  const skillsTable = document.getElementById('skills-table');
+const searchInput = document.getElementById('search-input');
+const prevPageButton = document.getElementById('prev-page');
+const nextPageButton = document.getElementById('next-page');
+const pageNumElement = document.getElementById('page-num');
+
+let currentPage = 1;
+const rowsPerPage = 10; // Adjust the number of rows per page as needed
+let filteredSkills = [];
+
+function initializePagination() {
+  const allRows = skillsTable.querySelectorAll('tbody tr');
+  const totalRows = allRows.length;
+  const totalPages = Math.ceil(totalRows / rowsPerPage);
+
+  if (totalPages > 1) {
+    prevPageButton.style.display = 'block';
+    nextPageButton.style.display = 'block';
+  } else {
+    prevPageButton.style.display = 'none';
+    nextPageButton.style.display = 'none';
+  }
+
+  prevPageButton.addEventListener('click', prevPage);
+  nextPageButton.addEventListener('click', nextPage);
+
+  showSkills();
+}
+
+function showSkills() {
+  const start = (currentPage - 1) * rowsPerPage;
+  const end = start + rowsPerPage;
+
+  const visibleSkills = filteredSkills.slice(start, end);
+
+  skillsTable.querySelectorAll('tbody tr').forEach(row => {
+    row.style.display = 'none';
+  });
+
+  visibleSkills.forEach(skill => {
+    skill.style.display = 'table-row';
+  });
+
+  pageNumElement.textContent = `Page ${currentPage}`;
+}
+
+function prevPage() {
+  if (currentPage > 1) {
+    currentPage--;
+    showSkills();
+  }
+}
+
+function nextPage() {
+  const totalPages = Math.ceil(filteredSkills.length / rowsPerPage);
+  if (currentPage < totalPages) {
+    currentPage++;
+    showSkills();
+  }
+}
+
+searchInput.addEventListener('input', searchSkills);
+
+function searchSkills() {
+  const searchTerm = searchInput.value.toLowerCase();
+
+  if (!searchTerm) {
+    filteredSkills = []; // Clear the filteredSkills array when the search input is empty
+  } else {
+    filteredSkills = Array.from(skillsTable.querySelectorAll('tbody tr')).filter(row => {
+      const titleCell = row.querySelector('td:nth-child(1)');
+      const titleText = titleCell.textContent.toLowerCase();
+      return titleText.includes(searchTerm);
+    });
+  }
+
+  currentPage = 1;
+  initializePagination();
+}
+
+initializePagination();
+
+
+
+
+
+// Edit skill using <i> tags
+  function editSkill(skillId) {
+    const titleElement = document.getElementById(`skill-title-${skillId}`);
+    const skillsElement = document.getElementById(`skill-skills-${skillId}`);
+    const editIcon = document.querySelector(`#skills-table #skill-row-${skillId} .edit-icon`);
+    const deleteIcon = document.querySelector(`#skills-table #skill-row-${skillId} .delete-icon`);
+    const saveIcon = document.querySelector(`#skills-table #skill-row-${skillId} .save-icon`);
+
+    // Enable editing
+    titleElement.contentEditable = true;
+    skillsElement.contentEditable = true;
+
+    // Show the "Save" icon and hide the edit and delete icons
+    editIcon.style.display = 'none';
+    deleteIcon.style.display = 'none';
+    saveIcon.style.display = 'inline';
+  }
+
+  // Save skill using <i> tags
+  function saveSkill(skillId) {
+    const titleElement = document.getElementById(`skill-title-${skillId}`);
+    const skillsElement = document.getElementById(`skill-skills-${skillId}`);
+    const editIcon = document.querySelector(`#skills-table #skill-row-${skillId} .edit-icon`);
+    const deleteIcon = document.querySelector(`#skills-table #skill-row-${skillId} .delete-icon`);
+    const saveIcon = document.querySelector(`#skills-table #skill-row-${skillId} .save-icon`);
+
+    // Disable editing
+    titleElement.contentEditable = false;
+    skillsElement.contentEditable = false;
+
+    // Show the "Edit" and "Delete" icons and hide the "Save" icon
+    editIcon.style.display = 'inline';
+    deleteIcon.style.display = 'inline';
+    saveIcon.style.display = 'none';
+
+    // Get the updated skill data
+    const updatedTitle = titleElement.textContent;
+    const updatedSkills = skillsElement.textContent;
+
+    // Send the updated data to the server using AJAX
+    fetch(`/update_skill/${skillId}/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}',
+      },
+      body: JSON.stringify({
+        title: updatedTitle,
+        skills: updatedSkills,
+      }),
+    })
+      .then(response => response.json())
+      .then(data => {
+        alert(data.message);
+        // Handle any response from the server (e.g., display a success message)
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+  }
+
+
+</script>
 
 
 
 {% endblock main %} {% block scripts %}
+
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css" />
