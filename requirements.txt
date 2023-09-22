@@ -1,5 +1,3 @@
-Django
-django-environ
 docx2txt
 en-core-web-lg @ https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.6.0/en_core_web_lg-3.6.0-py3-none-any.whl#sha256=9012584a8fcf5bc61bedb13a4b511fb81ffff9f770958ee06366671be10632e9
 en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.6.0/en_core_web_sm-3.6.0-py3-none-any.whl#sha256=83276fc78a70045627144786b52e1f2728ad5e29e5e43916ec37ea9c26a11212
@@ -16,32 +14,10 @@ huggingface-hub
 hyperopt
 idna
 ipython
-Janome
-jedi
-jellyfish
-Jinja2
-jmespath
-joblib
-jsonschema
-jsonschema-specifications
-kiwisolver
-langcodes
-langdetect
-lxml
-MarkupSafe
-matplotlib
-matplotlib-inline
-more-itertools
-mpld3
-mpmath
-murmurhash
-networkx
 nltk
 numpy
-packaging
 pandas
 pdfminer
-pdfminer.six
 Pillow
 polyfuzz
 psycopg2
@@ -60,11 +36,11 @@ scikit-learn
 six
 skillNer
 spacy
-spacy-legacy
-spacy-loggers
 thefuzz
 tokenizers
 torch
 tqdm
 transformer-smaller-training-vocab
 transformers
+Django
+django-environ
